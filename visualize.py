@@ -37,6 +37,9 @@ def plot_returns_distribution(returns: pd.Series,
         title (str): Plot title
         figsize (tuple): Figure size
     """
+    returns = returns.dropna()  # Drop NaN values
+    if not isinstance(returns, pd.Series):
+        returns = pd.Series(returns)
     plt.figure(figsize=figsize)
     sns.histplot(returns, kde=True)
     
