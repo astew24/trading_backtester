@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from scipy import stats
 from typing import Dict, Optional
 
 def plot_portfolio_value(results: pd.DataFrame, 

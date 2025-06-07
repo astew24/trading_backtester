@@ -81,7 +81,10 @@ def main():
     print(f"\nSymbol: {symbol}")
     print(f"Period: {start_date} to {end_date}")
     print(f"Initial Capital: ${initial_capital:,.2f}")
-    print(f"Final Portfolio Value: ${results['Portfolio_Value'].iloc[-1]:,.2f}")
+    final_value = results['Portfolio_Value'].iloc[-1]
+    if hasattr(final_value, 'item'):
+        final_value = final_value.item()
+    print(f"Final Portfolio Value: ${final_value:,.2f}")
     
     print("\n=== Performance Metrics ===")
     for metric, value in metrics.items():

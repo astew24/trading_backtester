@@ -13,7 +13,7 @@ class PerformanceMetrics:
             returns (pd.Series): Series of returns
             risk_free_rate (float): Annual risk-free rate (default: 2%)
         """
-        self.returns = returns
+        self.returns = returns.astype(float)  # Ensure returns are float
         self.risk_free_rate = risk_free_rate
         self.annual_factor = 252  # Trading days in a year
     
@@ -32,49 +32,55 @@ class PerformanceMetrics:
     
     def total_return(self) -> float:
         """Calculate total return."""
-        return (1 + self.returns).prod() - 1
+        return float((1 + self.returns).prod() - 1)
     
     def annualized_return(self) -> float:
         """Calculate annualized return."""
         total_return = self.total_return()
         years = len(self.returns) / self.annual_factor
-        return (1 + total_return) ** (1 / years) - 1
+        if years <= 0 or (1 + total_return) <= 0:
+            return float('nan')
+        try:
+            ann_return = (1 + total_return) ** (1 / years) - 1
+            return float(ann_return.real)  # .real in case of complex
+        except Exception:
+            return float('nan')
     
     def sharpe_ratio(self) -> float:
         """Calculate Sharpe ratio."""
         excess_returns = self.returns - self.risk_free_rate / self.annual_factor
-        return np.sqrt(self.annual_factor) * excess_returns.mean() / excess_returns.std()
+        return float(np.sqrt(self.annual_factor) * excess_returns.mean() / excess_returns.std())
     
     def sortino_ratio(self) -> float:
         """Calculate Sortino ratio."""
         excess_returns = self.returns - self.risk_free_rate / self.annual_factor
         downside_returns = excess_returns[excess_returns < 0]
-        downside_std = np.sqrt(np.mean(downside_returns ** 2))
-        return np.sqrt(self.annual_factor) * excess_returns.mean() / downside_std
+        downside_std = float(np.sqrt(np.mean(downside_returns ** 2)))
+        return float(np.sqrt(self.annual_factor) * excess_returns.mean() / downside_std)
     
     def max_drawdown(self) -> float:
         """Calculate maximum drawdown."""
         cumulative_returns = (1 + self.returns).cumprod()
         rolling_max = cumulative_returns.expanding().max()
         drawdowns = cumulative_returns / rolling_max - 1
-        return drawdowns.min()
+        return float(drawdowns.min())
     
     def win_rate(self) -> float:
         """Calculate win rate."""
         winning_trades = self.returns[self.returns > 0]
-        return len(winning_trades) / len(self.returns)
+        return float(len(winning_trades) / len(self.returns))
     
     def profit_factor(self) -> float:
         """Calculate profit factor."""
-        gains = self.returns[self.returns > 0].sum()
-        losses = abs(self.returns[self.returns < 0].sum())
+        gains = float(self.returns[self.returns > 0].sum())
+        losses = float(abs(self.returns[self.returns < 0].sum()))
         return gains / losses if losses != 0 else float('inf')
     
     def calmar_ratio(self) -> float:
         """Calculate Calmar ratio."""
         annualized_return = self.annualized_return()
         max_drawdown = self.max_drawdown()
-        return annualized_return / abs(max_drawdown) if max_drawdown != 0 else float('inf')
+        return float(annualized_return / abs(max_drawdown)) if max_drawdown != 0 else float('inf')
 
 def calculate_metrics(returns: pd.Series, risk_free_rate: float = 0.02) -> Dict[str, float]:
     """
