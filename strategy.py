@@ -1,40 +1,106 @@
 import pandas as pd
 import numpy as np
+from abc import ABC, abstractmethod
 
-def generate_signals(data_path, output_path, short_window=50, long_window=200):
+class Strategy(ABC):
+    """Base class for all trading strategies."""
+    
+    def __init__(self, name: str):
+        self.name = name
+    
+    @abstractmethod
+    def generate_signals(self, data: pd.DataFrame) -> pd.DataFrame:
+        """
+        Generate trading signals from the input data.
+        
+        Args:
+            data (pd.DataFrame): DataFrame with OHLCV data
+            
+        Returns:
+            pd.DataFrame: DataFrame with signals
+        """
+        pass
+    
+    def validate_data(self, data: pd.DataFrame) -> bool:
+        """
+        Validate that the input data has the required columns.
+        
+        Args:
+            data (pd.DataFrame): DataFrame to validate
+            
+        Returns:
+            bool: True if data is valid, False otherwise
+        """
+        required_columns = ['Open', 'High', 'Low', 'Close', 'Volume']
+        return all(col in data.columns for col in required_columns)
+
+class MovingAverageCrossover(Strategy):
+    """Moving Average Crossover Strategy."""
+    
+    def __init__(self, short_window: int = 50, long_window: int = 200):
+        super().__init__("Moving Average Crossover")
+        self.short_window = short_window
+        self.long_window = long_window
+    
+    def generate_signals(self, data: pd.DataFrame) -> pd.DataFrame:
+        """
+        Generate trading signals based on moving average crossovers.
+        
+        Args:
+            data (pd.DataFrame): DataFrame with OHLCV data
+            
+        Returns:
+            pd.DataFrame: DataFrame with signals
+        """
+        if not self.validate_data(data):
+            raise ValueError("Input data missing required columns")
+        
+        signals = pd.DataFrame(index=data.index)
+        signals['price'] = data['Close']
+        
+        # Calculate moving averages
+        signals[f'SMA_{self.short_window}'] = data['Close'].rolling(
+            window=self.short_window, min_periods=1).mean()
+        signals[f'SMA_{self.long_window}'] = data['Close'].rolling(
+            window=self.long_window, min_periods=1).mean()
+        
+        # Generate signals
+        signals['signal'] = 0.0
+        signals['signal'] = np.where(
+            signals[f'SMA_{self.short_window}'] > signals[f'SMA_{self.long_window}'], 
+            1.0, 0.0
+        )
+        
+        # Generate positions
+        signals['position'] = signals['signal'].diff()
+        
+        return signals
+
+def run_strategy(data_path: str, output_path: str, 
+                short_window: int = 50, long_window: int = 200) -> pd.DataFrame:
     """
-    Loads stock data, calculates SMAs, and generates trading signals.
+    Run the moving average crossover strategy on the given data.
+    
+    Args:
+        data_path (str): Path to input data file
+        output_path (str): Path to save output signals
+        short_window (int): Short moving average window
+        long_window (int): Long moving average window
+        
+    Returns:
+        pd.DataFrame: DataFrame with signals
     """
     try:
-        # Use index_col='Date' as the primary method
         data = pd.read_csv(data_path, index_col='Date', parse_dates=True)
     except Exception:
-        # Fallback for when the 'Date' column isn't a named column
         print("Could not find 'Date' column, attempting to use first column as index.")
         data = pd.read_csv(data_path, index_col=0, parse_dates=True)
-
-    # Ensure the index is named 'Date'
+    
     data.index.name = 'Date'
     
-    # *** THIS IS THE KEY FIX ***
-    # Isolate the 'Close' column to ensure we are only working with numbers
-    close_prices = data['Close']
-
-    # Create a new DataFrame for the signals, using the same index
-    signals = pd.DataFrame(index=data.index)
-    signals['price'] = close_prices
-
-    # Calculate SMAs on the clean 'close_prices' series
-    signals[f'SMA_{short_window}'] = close_prices.rolling(window=short_window, min_periods=1).mean()
-    signals[f'SMA_{long_window}'] = close_prices.rolling(window=long_window, min_periods=1).mean()
-
-    # Generate signal based on SMA crossover
-    signals['signal_raw'] = np.where(signals[f'SMA_{short_window}'] > signals[f'SMA_{long_window}'], 1.0, 0.0)
-
-    # Find the exact points of crossover
-    signals['positions'] = signals['signal_raw'].diff()
-
-    # Save the signals to a new CSV file
+    strategy = MovingAverageCrossover(short_window, long_window)
+    signals = strategy.generate_signals(data)
+    
     signals.to_csv(output_path)
     print(f"Signals generated and saved to {output_path}")
     return signals
@@ -42,10 +108,9 @@ def generate_signals(data_path, output_path, short_window=50, long_window=200):
 if __name__ == "__main__":
     input_data_path = 'data/AAPL_data.csv'
     output_data_path = 'data/AAPL_signals.csv'
-
-    # Generate the signals
-    trading_signals = generate_signals(input_data_path, output_data_path)
-
-    if trading_signals is not None:
+    
+    signals = run_strategy(input_data_path, output_data_path)
+    
+    if signals is not None:
         print("\n--- Last 10 Rows of Data with Signals ---")
-        print(trading_signals.tail(10))
+        print(signals.tail(10))
