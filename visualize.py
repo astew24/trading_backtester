@@ -37,7 +37,7 @@ def plot_returns_distribution(returns: pd.Series,
         title (str): Plot title
         figsize (tuple): Figure size
     """
-    returns = returns.dropna()  # Drop NaN values
+    returns = pd.to_numeric(returns, errors='coerce').dropna()  # Convert to numeric and drop NaN
     if not isinstance(returns, pd.Series):
         returns = pd.Series(returns)
     plt.figure(figsize=figsize)
@@ -67,11 +67,10 @@ def plot_drawdown(results: pd.DataFrame,
         title (str): Plot title
         figsize (tuple): Figure size
     """
-    # Calculate drawdown
-    portfolio_value = results['Portfolio_Value']
+    portfolio_value = pd.to_numeric(results['Portfolio_Value'], errors='coerce').dropna()
     rolling_max = portfolio_value.expanding().max()
     drawdown = (portfolio_value - rolling_max) / rolling_max
-    
+    drawdown = drawdown.replace([np.inf, -np.inf], np.nan).dropna()  # Drop infinities and NaN
     plt.figure(figsize=figsize)
     plt.fill_between(drawdown.index, drawdown.values, 0, color='red', alpha=0.3)
     plt.plot(drawdown.index, drawdown.values, color='red')
@@ -122,9 +121,9 @@ def plot_trade_analysis(trades: list,
     
     # Extract trade data
     entry_dates = [t.entry_date for t in trades]
-    entry_prices = [t.entry_price for t in trades]
+    entry_prices = [t.entry_price.item() if hasattr(t.entry_price, 'item') else t.entry_price for t in trades]
     exit_dates = [t.exit_date for t in trades if t.exit_date]
-    exit_prices = [t.exit_price for t in trades if t.exit_price]
+    exit_prices = [t.exit_price.item() if hasattr(t.exit_price, 'item') else t.exit_price for t in trades if t.exit_price is not None]
     pnls = [t.pnl for t in trades if t.pnl is not None]
     
     plt.figure(figsize=figsize)
