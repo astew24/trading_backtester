@@ -1,0 +1,31 @@
+# Trading Strategy Configuration
+
+# Symbols to test
+symbols:
+  - AAPL
+  - MSFT
+  - GOOG
+  - AMZN
+
+# Strategy Parameters
+strategy:
+  short_window: 20
+  long_window: 100
+  initial_capital: 100000.0
+
+# Backtest Period
+backtest:
+  days: 365  # Number of days to look back
+
+# Risk Management
+risk:
+  risk_free_rate: 0.02  # 2% annual risk-free rate
+  commission: 0.001     # 0.1% commission per trade
+  slippage: 0.0001     # 0.01% slippage per trade
+
+# Visualization
+visualization:
+  figsize_portfolio: [12, 6]
+  figsize_returns: [10, 6]
+  figsize_drawdown: [12, 6]
+  figsize_trades: [12, 8] 
