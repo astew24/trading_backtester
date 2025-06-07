@@ -1,98 +1,63 @@
 # Trading Strategy Backtester
 
-A robust Python application for backtesting trading strategies against historical stock data. This project provides a framework for testing trading strategies, calculating performance metrics, and visualizing results.
+A Python application for backtesting trading strategies on historical stock data.  
+Simulates trades, calculates profitability, evaluates performance metrics, and visualizes results.
 
 ## Features
 
-- Historical data fetching using Yahoo Finance
-- Flexible strategy implementation framework
-- Realistic backtesting with transaction costs and slippage
-- Comprehensive performance metrics calculation
-- Interactive visualization of results
-- Support for multiple trading strategies
-
-## Project Structure
-
-```
-trading_backtester/
-├── main.py           # Main script to run backtests
-├── strategy.py       # Strategy implementation framework
-├── backtest.py       # Backtesting engine
-├── metrics.py        # Performance metrics calculation
-├── visualize.py      # Results visualization
-├── requirements.txt  # Project dependencies
-└── data/            # Data storage directory
-```
+- Download historical stock data (via Yahoo Finance)
+- Moving Average Crossover strategy (with parameter optimization)
+- Backtesting engine with trade simulation
+- Performance metrics: Sharpe, Sortino, Max Drawdown, Win Rate, etc.
+- Visualizations: Portfolio value, returns distribution, drawdown, trade analysis
+- Configurable via `config.yaml`
+- Modular and extensible codebase
 
 ## Installation
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/trading_backtester.git
+```sh
+git clone https://github.com/astew24/trading_backtester.git
 cd trading_backtester
-```
-
-2. Create and activate a virtual environment:
-```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Install dependencies:
-```bash
+source venv/bin/activate  # or .\\venv\\Scripts\\activate on Windows
 pip install -r requirements.txt
 ```
 
 ## Usage
 
-1. Run a basic backtest:
-```bash
+Edit `config.yaml` to set your symbols and parameters.
+
+Run the backtester:
+```sh
 python main.py
 ```
 
-2. Customize the strategy parameters in `main.py`:
-```python
-symbol = "AAPL"  # Change the stock symbol
-start_date = "2023-01-01"  # Change the start date
-end_date = "2023-12-31"    # Change the end date
-initial_capital = 100000.0  # Change the initial capital
-```
+## Configuration
 
-3. Implement your own strategy:
-   - Create a new class that inherits from the `Strategy` base class
-   - Implement the `generate_signals` method
-   - Use your strategy in the backtest
+- `config.yaml` controls:
+  - List of stock symbols
+  - Backtest period (days)
+  - Strategy parameters (initial capital, moving average windows)
+  - Risk-free rate
 
-## Performance Metrics
+## Project Structure
 
-The backtester calculates the following metrics:
-- Total Return
-- Annualized Return
-- Sharpe Ratio
-- Sortino Ratio
-- Maximum Drawdown
-- Win Rate
-- Profit Factor
-- Calmar Ratio
+- `main.py` - Entry point, orchestrates the workflow
+- `strategy.py` - Trading strategy logic and parameter optimization
+- `metrics.py` - Performance metrics calculations
+- `visualize.py` - Plotting and analysis visualizations
+- `config.yaml` - User-editable configuration
+- `requirements.txt` - Python dependencies
 
-## Visualization
+## Example Output
 
-The project includes several visualization tools:
-- Portfolio value over time
-- Returns distribution
-- Drawdown analysis
-- Trade analysis
-- Performance metrics comparison
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+![Portfolio Value Plot](screenshots/portfolio_value.png)
+![Returns Distribution](screenshots/returns_distribution.png)
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT License
 
-## Acknowledgments
+---
 
-- Yahoo Finance for providing historical data
-- The Python data science community for their excellent libraries
+*Created by [Andrew Stewart](https://github.com/astew24)*
