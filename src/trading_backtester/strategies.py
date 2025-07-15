@@ -156,6 +156,8 @@ class MeanReversionStrategy(BaseStrategy):
         )
         liquid = avg_dollar_volume >= self.min_avg_dollar_volume
 
+        # State machine: iterate bar-by-bar so entry/exit logic is explicit and
+        # easy to audit. Vectorized version would be faster but harder to verify.
         positions: list[float] = []
         current_position = 0.0
         for is_liquid, current_zscore in zip(
