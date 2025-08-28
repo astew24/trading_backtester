@@ -61,6 +61,7 @@ def write_run_artifacts(
         show=config["reporting"].get("show_plots", False),
     )
 
+    n_trades = len(trade_frame)
     raw_summary_lines: list[str | None] = [
         f"# Backtest Run: {strategy_name}",
         "",
@@ -71,6 +72,7 @@ def write_run_artifacts(
             else None
         ),
         f"Rows: {len(results)}",
+        f"Total trades: {n_trades}",
         "",
         "## Headline Metrics",
         "",
