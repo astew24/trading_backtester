@@ -57,6 +57,13 @@ class Trade:
 
 
 class BacktestEngine:
+    """Single-asset event-driven backtest engine.
+
+    Handles position sizing, transaction costs, stop-loss / take-profit, and
+    optional volatility targeting. Each call to run() starts from a clean state
+    so the same instance can be reused across multiple symbols.
+    """
+
     def __init__(self, config: BacktestConfig | None = None) -> None:
         self.config = config or BacktestConfig()
         self.cash = self.config.initial_capital
