@@ -90,6 +90,8 @@ class BacktestEngine:
             close_price = float(bar["Close"])
             turnover = 0.0
 
+            # Signal is taken from the previous bar (index - 1) to reflect end-of-day
+            # generation; fills execute at today's open. This is the key lookahead guard.
             target_signal = (
                 float(signal_frame["target_position"].iloc[index - 1])
                 if index > 0
