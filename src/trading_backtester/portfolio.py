@@ -11,6 +11,11 @@ def buy_and_hold_curve(close: pd.Series, initial_capital: float) -> pd.Series:
 def combine_results(
     results_by_symbol: dict[str, pd.DataFrame], initial_capital: float
 ) -> pd.DataFrame:
+    """Combine per-symbol result frames into an equal-weighted portfolio.
+
+    Each symbol contributes an equal share of ``initial_capital``. Returns are
+    averaged across symbols on each date; portfolio value compounds from there.
+    """
     if not results_by_symbol:
         raise ValueError("results_by_symbol cannot be empty")
 
