@@ -13,6 +13,7 @@ from .visualize import render_default_charts
 
 
 def create_run_id(strategy_name: str, symbols: list[str]) -> str:
+    """Build a timestamped run ID from strategy name and up to 3 symbols."""
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
     symbol_slug = "-".join(symbols[:3]).lower()
     return f"{timestamp}_{strategy_name}_{symbol_slug}"
