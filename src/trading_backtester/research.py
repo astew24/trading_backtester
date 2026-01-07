@@ -20,6 +20,8 @@ from .strategies import build_strategy
 
 @dataclass(frozen=True)
 class WalkForwardWindow:
+    """A single fold in a rolling walk-forward validation run."""
+
     train_start: pd.Timestamp
     train_end: pd.Timestamp
     test_start: pd.Timestamp
