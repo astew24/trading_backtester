@@ -1,4 +1,4 @@
-# Trading Strategy Backtester
+# Trading Strategy Backtesterv1
 
 A Python application for backtesting trading strategies on historical stock data.  
 Simulates trades, calculates profitability, evaluates performance metrics, and visualizes results.
