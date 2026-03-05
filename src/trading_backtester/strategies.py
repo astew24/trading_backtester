@@ -156,6 +156,8 @@ class MeanReversionStrategy(BaseStrategy):
             )
             .mean()
         )
+        # 5M ADV threshold screens out illiquid names — reduces fill slippage and
+        # avoids false signals from thin-volume price spikes
         liquid = avg_dollar_volume >= self.min_avg_dollar_volume
 
         # State machine: iterate bar-by-bar so entry/exit logic is explicit and
