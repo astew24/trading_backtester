@@ -77,6 +77,16 @@ class PerformanceMetrics:
         """
         return float(np.percentile(self.returns, (1.0 - confidence) * 100))
 
+    def expected_shortfall(self, confidence: float = 0.95) -> float:
+        """Expected Shortfall (CVaR) — average loss in the tail beyond VaR.
+
+        More informative than VaR for fat-tailed return distributions because
+        it captures the severity of tail losses, not just the frequency.
+        """
+        cutoff = np.percentile(self.returns, (1.0 - confidence) * 100)
+        tail = self.returns[self.returns <= cutoff]
+        return float(tail.mean()) if len(tail) > 0 else cutoff
+
 
 def _trade_metrics(trades: Iterable[Trade]) -> dict[str, float]:
     trade_list = list(trades)
