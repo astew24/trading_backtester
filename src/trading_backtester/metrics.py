@@ -85,10 +85,15 @@ def _trade_metrics(trades: Iterable[Trade]) -> dict[str, float]:
     gross_loss = abs(net_pnls[net_pnls < 0.0].sum())
     profit_factor = gross_profit / gross_loss if gross_loss > 0.0 else float("inf")
 
+    winning = net_pnls[net_pnls > 0.0]
+    losing  = net_pnls[net_pnls < 0.0]
+
     return {
         "Win Rate": float((net_pnls > 0.0).mean()),
         "Profit Factor": float(profit_factor),
         "Average Trade Return": float(np.nanmean(returns)),
+        "Average Win": float(winning.mean()) if winning.size > 0 else float("nan"),
+        "Average Loss": float(losing.mean()) if losing.size > 0 else float("nan"),
         "Total Trades": float(len(trade_list)),
     }
 
