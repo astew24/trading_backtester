@@ -107,6 +107,8 @@ class MovingAverageCrossover(BaseStrategy):
 
         if best is None:
             raise ValueError("No valid parameter combinations were evaluated")
+        # Note: this is in-sample Sharpe — use walk-forward validation before
+        # trusting the selected parameters out-of-sample.
         return best
 
 
