@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trading-backtester"
+version = "0.2.0"
+description = "A small research-oriented backtester for daily trading strategies."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "matplotlib>=3.8,<4.0",
+  "numpy>=1.26,<3.0",
+  "pandas>=2.2,<3.0",
+  "pyyaml>=6.0,<7.0",
+  "scipy>=1.12,<2.0",
+  "seaborn>=0.13,<0.14",
+  "yfinance>=0.2.54,<0.3",
+]
+
+[project.optional-dependencies]
+dev = [
+  "black>=24.4,<25.0",
+  "mypy>=1.10,<2.0",
+  "pytest>=8.2,<9.0",
+  "ruff>=0.4.8,<0.5",
+  "types-PyYAML>=6.0,<7.0",
+]
+
+[project.scripts]
+trading-backtester = "trading_backtester.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+strict_optional = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+exclude = ["tests/"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

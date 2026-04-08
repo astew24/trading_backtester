@@ -1,63 +1,88 @@
-# Trading Strategy Backtesterv1
+# Trading Backtester
 
-A Python application for backtesting trading strategies on historical stock data.  
-Simulates trades, calculates profitability, evaluates performance metrics, and visualizes results.
+Small research-oriented backtester for daily trading strategies. The project started as a simple moving-average sandbox and has been tightened up into a more reliable workflow with cleaner execution logic, reproducible run artifacts, and basic engineering guardrails.
 
-## Features
+## What it does
 
-- Download historical stock data (via Yahoo Finance)
-- Moving Average Crossover strategy (with parameter optimization)
-- Backtesting engine with trade simulation
-- Performance metrics: Sharpe, Sortino, Max Drawdown, Win Rate, etc.
-- Visualizations: Portfolio value, returns distribution, drawdown, trade analysis
-- Configurable via `config.yaml`
-- Modular and extensible codebase
+- downloads and caches daily OHLCV data with `yfinance`
+- runs either a moving-average crossover strategy or a mean-reversion strategy
+- simulates fills with commission, spread, slippage, and stop-based exits
+- writes each run to `artifacts/` with results, trades, metrics, config snapshot, and plots
+- supports quick local checks with `pytest`, `ruff`, `black`, and `mypy`
 
-## Installation
+## Layout
 
-```sh
-git clone https://github.com/astew24/trading_backtester.git
-cd trading_backtester
-python -m venv venv
-source venv/bin/activate  # or .\\venv\\Scripts\\activate on Windows
-pip install -r requirements.txt
+```text
+.
+├── src/trading_backtester/   # package code
+├── tests/                    # unit tests
+├── config.yaml               # default run configuration
+├── main.py                   # root entrypoint
+├── pyproject.toml            # package + tool configuration
+└── Makefile                  # common commands
 ```
 
-## Usage
+## Setup
 
-Edit `config.yaml` to set your symbols and parameters.
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+```
 
-Run the backtester:
-```sh
+## Run a backtest
+
+Use the default config:
+
+```bash
 python main.py
+```
+
+Or switch strategy / symbols from the command line:
+
+```bash
+python main.py --strategy moving_average --symbols AAPL MSFT
+```
+
+You can also run the installed console script after `pip install -e .[dev]`:
+
+```bash
+trading-backtester --config config.yaml
 ```
 
 ## Configuration
 
-- `config.yaml` controls:
-  - List of stock symbols
-  - Backtest period (days)
-  - Strategy parameters (initial capital, moving average windows)
-  - Risk-free rate
+`config.yaml` controls:
 
-## Project Structure
+- symbols and date range
+- strategy selection and parameters
+- transaction cost assumptions
+- stop loss / take profit / trailing stop settings
+- artifact output behavior
 
-- `main.py` - Entry point, orchestrates the workflow
-- `strategy.py` - Trading strategy logic and parameter optimization
-- `metrics.py` - Performance metrics calculations
-- `visualize.py` - Plotting and analysis visualizations
-- `config.yaml` - User-editable configuration
-- `requirements.txt` - Python dependencies
+## Outputs
 
-## Example Output
+Each run creates a timestamped directory under `artifacts/` containing:
 
-![Portfolio Value Plot](screenshots/portfolio_value.png)
-![Returns Distribution](screenshots/returns_distribution.png)
+- `results.csv`
+- `trades.csv`
+- `metrics.json`
+- `config_snapshot.yaml`
+- `summary.md`
+- chart images
 
-## License
+There is also a short note on design tradeoffs in `docs/assumptions_and_limitations.md`.
 
-MIT License
+## Development
 
----
+```bash
+make test
+make lint
+make typecheck
+```
 
-*Created by [Andrew Stewart](https://github.com/astew24)*
+If you use pre-commit locally:
+
+```bash
+pre-commit install
+```
