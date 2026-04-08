@@ -68,6 +68,15 @@ class PerformanceMetrics:
             return float("inf")
         return float(self.annualized_return() / abs(drawdown))
 
+    def value_at_risk(self, confidence: float = 0.95) -> float:
+        """Historical 1-day VaR at the given confidence level.
+
+        Returns the loss (as a negative number) that is not exceeded on
+        `confidence` fraction of days. E.g. a 95% VaR of -0.02 means
+        losses exceed 2% on only 5% of trading days.
+        """
+        return float(np.percentile(self.returns, (1.0 - confidence) * 100))
+
 
 def _trade_metrics(trades: Iterable[Trade]) -> dict[str, float]:
     trade_list = list(trades)
