@@ -27,6 +27,8 @@ def write_run_artifacts(
     metrics: dict[str, float],
     trades: list[Trade],
     benchmark: pd.Series | None = None,
+    benchmark_label: str | None = None,
+    extra_summary_sections: list[str] | None = None,
 ) -> Path:
     output_root = Path(config["reporting"]["output_dir"])
     run_id = create_run_id(strategy_name, symbols)
@@ -46,30 +48,41 @@ def write_run_artifacts(
         trade_frame.to_csv(run_dir / "trades.csv", index=False)
 
     if benchmark is not None:
-        benchmark.rename("benchmark").to_csv(run_dir / "benchmark.csv")
+        benchmark.rename(benchmark_label or "benchmark").to_csv(
+            run_dir / "benchmark.csv"
+        )
 
     render_default_charts(
         results,
         benchmark=benchmark,
+        benchmark_label=benchmark_label or "Benchmark",
         trades=trade_frame if not trade_frame.empty else None,
         output_dir=run_dir if config["reporting"].get("save_plots", True) else None,
         show=config["reporting"].get("show_plots", False),
     )
 
-    summary_lines = [
+    raw_summary_lines: list[str | None] = [
         f"# Backtest Run: {strategy_name}",
         "",
         f"Symbols: {', '.join(symbols)}",
+        (
+            f"Benchmark: {benchmark_label}"
+            if benchmark is not None and benchmark_label
+            else None
+        ),
         f"Rows: {len(results)}",
         "",
         "## Headline Metrics",
         "",
     ]
+    summary_lines = [line for line in raw_summary_lines if line is not None]
     for key, value in metrics.items():
         if isinstance(value, float):
             summary_lines.append(f"- {key}: {value:.4f}")
         else:
             summary_lines.append(f"- {key}: {value}")
+    if extra_summary_sections:
+        summary_lines.extend(extra_summary_sections)
 
     with (run_dir / "summary.md").open("w", encoding="utf-8") as handle:
         handle.write("\n".join(summary_lines))

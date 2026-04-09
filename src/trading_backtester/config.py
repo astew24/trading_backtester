@@ -56,6 +56,25 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "risk": {
         "risk_free_rate": 0.02,
     },
+    "research": {
+        "train_bars": 252,
+        "test_bars": 63,
+        "step_bars": 63,
+        "metric": "Sharpe Ratio",
+        "parameter_grid": {
+            "mean_reversion": {
+                "lookback": [10, 20, 30],
+                "entry_zscore": [1.0, 1.5, 2.0],
+                "exit_zscore": [0.25, 0.5],
+                "allow_short": [True],
+            },
+            "moving_average": {
+                "short_window": [10, 20, 30],
+                "long_window": [50, 100, 150],
+                "allow_short": [True],
+            },
+        },
+    },
 }
 
 

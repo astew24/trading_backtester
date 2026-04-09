@@ -19,5 +19,5 @@ This project is still a daily-bar backtester. It is more realistic than the orig
 ## Next logical steps
 
 - move from per-symbol aggregation to a shared portfolio ledger
-- add benchmark-aware reporting and walk-forward validation
 - support richer data sources and intraday timestamps
+- add borrow and financing assumptions for short inventory

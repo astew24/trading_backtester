@@ -93,11 +93,67 @@ def _trade_metrics(trades: Iterable[Trade]) -> dict[str, float]:
     }
 
 
+def _benchmark_metrics(
+    returns: pd.Series,
+    benchmark_returns: pd.Series,
+    *,
+    risk_free_rate: float,
+    annual_factor: int = 252,
+) -> dict[str, float]:
+    strategy_returns, benchmark = returns.align(benchmark_returns, join="inner")
+    strategy_returns = pd.to_numeric(strategy_returns, errors="coerce").fillna(0.0)
+    benchmark = pd.to_numeric(benchmark, errors="coerce").fillna(0.0)
+
+    if strategy_returns.empty or benchmark.empty:
+        return {}
+
+    benchmark_stats = PerformanceMetrics(
+        returns=benchmark,
+        risk_free_rate=risk_free_rate,
+        annual_factor=annual_factor,
+    )
+    active_returns = strategy_returns - benchmark
+    tracking_error = active_returns.std(ddof=0) * np.sqrt(annual_factor)
+    information_ratio = (
+        np.sqrt(annual_factor) * active_returns.mean() / active_returns.std(ddof=0)
+        if active_returns.std(ddof=0) > 0.0
+        else float("nan")
+    )
+
+    benchmark_variance = benchmark.var(ddof=0)
+    beta = (
+        strategy_returns.cov(benchmark, ddof=0) / benchmark_variance
+        if benchmark_variance > 0.0
+        else float("nan")
+    )
+    daily_rf = risk_free_rate / annual_factor
+    alpha = float(
+        (strategy_returns - daily_rf - (beta * (benchmark - daily_rf))).mean()
+        * annual_factor
+    )
+
+    return {
+        "Benchmark Return": benchmark_stats.total_return(),
+        "Benchmark Annualized Return": benchmark_stats.annualized_return(),
+        "Excess Return": PerformanceMetrics(
+            returns=strategy_returns,
+            risk_free_rate=risk_free_rate,
+            annual_factor=annual_factor,
+        ).total_return()
+        - benchmark_stats.total_return(),
+        "Tracking Error": float(tracking_error),
+        "Information Ratio": float(information_ratio),
+        "Beta": float(beta),
+        "Alpha": alpha,
+    }
+
+
 def calculate_metrics(
     data: pd.Series | pd.DataFrame,
     trades: Iterable[Trade] | None = None,
     *,
     risk_free_rate: float = 0.02,
+    benchmark_returns: pd.Series | None = None,
 ) -> dict[str, float]:
     if isinstance(data, pd.DataFrame):
         if "Returns" not in data.columns:
@@ -135,5 +191,14 @@ def calculate_metrics(
         "Average Daily Turnover": avg_turnover,
         "Average Gross Exposure": avg_gross_exposure,
     }
+    if benchmark_returns is not None:
+        metrics.update(
+            _benchmark_metrics(
+                returns=pd.to_numeric(returns, errors="coerce").fillna(0.0),
+                benchmark_returns=benchmark_returns,
+                risk_free_rate=risk_free_rate,
+                annual_factor=stats.annual_factor,
+            )
+        )
     metrics.update(_trade_metrics(trades or []))
     return metrics

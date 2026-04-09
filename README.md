@@ -1,77 +1,97 @@
-# Trading Backtester
+# Liquidity-Aware Equity Strategy Backtester
 
-Small research-oriented backtester for daily trading strategies. The project started as a simple moving-average sandbox and has been tightened up into a more reliable workflow with cleaner execution logic, reproducible run artifacts, and basic engineering guardrails.
+This repo is a small quant research harness for daily-bar equity strategies. The focus is not on maximizing the number of indicators; it is on running short-horizon ideas with realistic trading frictions, benchmark-relative analytics, and a walk-forward workflow that is useful for actual strategy research.
 
-## What it does
+The current setup is strongest for liquid U.S. equities or sector ETFs where you want to test ideas like z-score mean reversion or slower trend-following without pretending daily data can answer microstructure questions it cannot.
 
-- downloads and caches daily OHLCV data with `yfinance`
-- runs either a moving-average crossover strategy or a mean-reversion strategy
-- simulates fills with commission, spread, slippage, and stop-based exits
-- writes each run to `artifacts/` with results, trades, metrics, config snapshot, and plots
-- supports quick local checks with `pytest`, `ruff`, `black`, and `mypy`
+## Why this is more than a toy script
 
-## Layout
+- transaction cost model includes commission, spread, and slippage
+- exits support stop loss, take profit, and trailing stop logic with conservative daily-bar handling
+- mean-reversion signals are liquidity-gated by average dollar volume
+- benchmark-aware reporting includes excess return, tracking error, information ratio, beta, and alpha
+- walk-forward mode selects parameters on a training window and scores them out of sample
+- each run writes a reproducible artifact bundle with config snapshot, metrics, trades, CSV outputs, and charts
+
+## Strategy coverage
+
+- `mean_reversion`: liquidity-aware z-score reversion for short-horizon equity ideas
+- `moving_average`: slower crossover baseline for comparison and sanity checks
+
+Both strategies execute on the next bar's open, which keeps the backtest aligned with end-of-day signal generation.
+
+## Repo layout
 
 ```text
 .
 ├── src/trading_backtester/   # package code
 ├── tests/                    # unit tests
-├── config.yaml               # default run configuration
-├── main.py                   # root entrypoint
-├── pyproject.toml            # package + tool configuration
-└── Makefile                  # common commands
+├── docs/                     # design notes and limitations
+├── config.yaml               # default run + research config
+├── main.py                   # local entrypoint without installation
+└── Makefile                  # common dev commands
 ```
 
 ## Setup
 
 ```bash
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
+pip install -e .[dev]
+```
+
+If you want the lightweight root install path instead:
+
+```bash
 pip install -r requirements-dev.txt
 ```
 
-## Run a backtest
-
-Use the default config:
+## Run a standard backtest
 
 ```bash
-python main.py
+python3 main.py
 ```
 
-Or switch strategy / symbols from the command line:
+Override the strategy or symbol universe from the command line:
 
 ```bash
-python main.py --strategy moving_average --symbols AAPL MSFT
+python3 main.py --strategy mean_reversion --symbols XLF XLK XLE
 ```
 
-You can also run the installed console script after `pip install -e .[dev]`:
+After installation, the console entrypoint works too:
 
 ```bash
 trading-backtester --config config.yaml
 ```
 
-## Configuration
+## Run walk-forward validation
 
-`config.yaml` controls:
+The default config includes parameter grids for both strategies. This mode rolls a training window forward, picks the best parameter set on the configured metric, and reports out-of-sample performance.
 
-- symbols and date range
-- strategy selection and parameters
-- transaction cost assumptions
-- stop loss / take profit / trailing stop settings
-- artifact output behavior
+```bash
+python3 main.py --walk-forward
+```
 
-## Outputs
+Useful knobs in `config.yaml`:
 
-Each run creates a timestamped directory under `artifacts/` containing:
+- `research.train_bars`
+- `research.test_bars`
+- `research.step_bars`
+- `research.metric`
+- `research.parameter_grid`
+
+## Output artifacts
+
+Each run writes a timestamped directory under `artifacts/` with:
 
 - `results.csv`
 - `trades.csv`
 - `metrics.json`
 - `config_snapshot.yaml`
 - `summary.md`
-- chart images
-
-There is also a short note on design tradeoffs in `docs/assumptions_and_limitations.md`.
+- `benchmark.csv` when a benchmark is configured
+- `walk_forward_windows.csv` for walk-forward runs
+- performance charts in PNG format
 
 ## Development
 
@@ -81,8 +101,4 @@ make lint
 make typecheck
 ```
 
-If you use pre-commit locally:
-
-```bash
-pre-commit install
-```
+There is a short discussion of model assumptions in [docs/assumptions_and_limitations.md](docs/assumptions_and_limitations.md).

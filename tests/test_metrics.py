@@ -29,3 +29,26 @@ def test_calculate_metrics_uses_results_frame() -> None:
 
     assert "Average Daily Turnover" in metrics
     assert math.isclose(metrics["Average Daily Turnover"], 0.075, rel_tol=1e-9)
+
+
+def test_calculate_metrics_includes_benchmark_comparison_stats() -> None:
+    results = pd.DataFrame(
+        {
+            "Returns": [0.0, 0.01, -0.005, 0.015],
+            "Turnover": [0.0, 0.1, 0.0, 0.1],
+            "Gross_Exposure": [0.0, 80000.0, 85000.0, 82000.0],
+            "Portfolio_Value": [100000.0, 101000.0, 100495.0, 102002.425],
+        }
+    )
+    benchmark_returns = pd.Series([0.0, 0.008, -0.002, 0.01])
+
+    metrics = calculate_metrics(
+        results,
+        risk_free_rate=0.0,
+        benchmark_returns=benchmark_returns,
+    )
+
+    assert "Benchmark Return" in metrics
+    assert "Information Ratio" in metrics
+    assert "Beta" in metrics
+    assert math.isfinite(metrics["Benchmark Return"])
