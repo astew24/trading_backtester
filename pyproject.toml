@@ -19,6 +19,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+app = [
+  "plotly>=5.22,<6.0",
+  "streamlit>=1.44,<2.0",
+]
 dev = [
   "black>=24.4,<25.0",
   "mypy>=1.10,<2.0",

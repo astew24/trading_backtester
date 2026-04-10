@@ -1,5 +1,7 @@
 # Liquidity-Aware Equity Strategy Backtester
 
+[![Deploy to Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/)
+
 This repo is a small quant research harness for daily-bar equity strategies. The focus is not on maximizing the number of indicators; it is on running short-horizon ideas with realistic trading frictions, benchmark-relative analytics, and a walk-forward workflow that is useful for actual strategy research.
 
 The current setup is strongest for liquid U.S. equities or sector ETFs where you want to test ideas like z-score mean reversion or slower trend-following without pretending daily data can answer microstructure questions it cannot.
@@ -37,7 +39,7 @@ Both strategies execute on the next bar's open, which keeps the backtest aligned
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e .[dev]
+pip install -e .[dev,app]
 ```
 
 If you want the lightweight root install path instead:
@@ -45,6 +47,23 @@ If you want the lightweight root install path instead:
 ```bash
 pip install -r requirements-dev.txt
 ```
+
+## Web Demo
+
+The fastest way to show the project to an employer is the Streamlit app. It uses live Yahoo Finance data, the existing moving-average strategy, the existing backtest engine, and read-only in-memory execution.
+
+Run it locally:
+
+```bash
+streamlit run streamlit_app.py
+```
+
+Deploy it with Streamlit Community Cloud:
+
+1. Push the repo to GitHub.
+2. In Streamlit Community Cloud, create a new app from the repository.
+3. Set the app entrypoint to `streamlit_app.py`.
+4. Let Streamlit install dependencies from `requirements.txt`.
 
 ## Run a standard backtest
 
