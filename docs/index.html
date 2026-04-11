@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Liquidity-Aware Equity Strategy Backtester</title>
+  <meta name="description" content="A daily-bar equity strategy backtester with realistic transaction costs, walk-forward validation, and benchmark-relative analytics." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f9f8f6;
+      --surface: #ffffff;
+      --border: #e5e2dc;
+      --text: #1a1a18;
+      --muted: #6b6860;
+      --accent: #1d4ed8;
+      --accent-soft: #eff6ff;
+      --code-bg: #1e1e1e;
+      --code-text: #d4d4d4;
+      --green: #15803d;
+      --green-soft: #f0fdf4;
+      --max: 860px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    /* ── topbar ── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(249, 248, 246, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .topbar-brand {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.01em;
+    }
+    .topbar-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .topbar-links a {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .topbar-links a:hover { color: var(--text); }
+    .topbar-links a.btn {
+      color: var(--accent);
+      font-weight: 500;
+      border: 1px solid var(--accent);
+      padding: 4px 12px;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+    .topbar-links a.btn:hover { background: var(--accent-soft); }
+
+    /* ── shell ── */
+    .shell {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── hero ── */
+    .hero {
+      padding: 64px 0 48px;
+      border-bottom: 1px solid var(--border);
+    }
+    .eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .hero h1 {
+      font-size: clamp(1.6rem, 3.5vw, 2.1rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .hero-sub {
+      font-size: 15px;
+      color: var(--muted);
+      max-width: 620px;
+      margin-bottom: 28px;
+      line-height: 1.7;
+    }
+    .hero-links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .hero-links a {
+      font-size: 13.5px;
+      font-weight: 500;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 7px;
+      transition: all 0.15s;
+    }
+    .hero-links .primary {
+      background: var(--text);
+      color: #fff;
+    }
+    .hero-links .primary:hover { background: #333; }
+    .hero-links .secondary {
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: var(--surface);
+    }
+    .hero-links .secondary:hover { border-color: #bbb; }
+
+    /* ── stat row ── */
+    .stat-row {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      overflow: hidden;
+      margin: 40px 0;
+    }
+    .stat {
+      flex: 1;
+      padding: 20px 24px;
+      border-right: 1px solid var(--border);
+    }
+    .stat:last-child { border-right: none; }
+    .stat-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      display: block;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── sections ── */
+    .section {
+      padding: 48px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .section:last-child { border-bottom: none; }
+    .section-header {
+      margin-bottom: 24px;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .section h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+    .section p {
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 14px;
+    }
+    .section p:last-child { margin-bottom: 0; }
+
+    /* ── feature grid ── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+      margin-top: 8px;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 18px 20px;
+    }
+    .feature-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .feature-card p {
+      font-size: 13px;
+      margin-bottom: 0;
+      color: var(--muted);
+    }
+
+    /* ── two-col ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ── list ── */
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .check-list li {
+      font-size: 14px;
+      color: var(--muted);
+      padding-left: 22px;
+      position: relative;
+      line-height: 1.55;
+    }
+    .check-list li::before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-size: 12px;
+      top: 1px;
+    }
+
+    /* ── code block ── */
+    .code-wrap {
+      margin-top: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #2d2d2d;
+    }
+    .code-header {
+      background: #252526;
+      padding: 9px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .code-filename {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11.5px;
+      color: #9d9d9d;
+    }
+    .code-lang {
+      font-size: 10.5px;
+      color: #5a5a5a;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12.5px;
+      line-height: 1.65;
+      padding: 20px;
+      overflow-x: auto;
+      margin: 0;
+    }
+
+    /* ── config table ── */
+    .config-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      margin-top: 16px;
+    }
+    .config-table th {
+      text-align: left;
+      padding: 9px 14px;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .config-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .config-table tr:last-child td { border-bottom: none; }
+    .config-table td:first-child {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12.5px;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+    .config-table td:nth-child(2) {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── badge ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 20px;
+      letter-spacing: 0.03em;
+    }
+    .badge-green { background: var(--green-soft); color: var(--green); }
+    .badge-blue { background: var(--accent-soft); color: var(--accent); }
+
+    /* ── footer ── */
+    .footer {
+      padding: 32px 0 40px;
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+    .footer a { color: var(--muted); text-decoration: none; }
+    .footer a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<nav class="topbar">
+  <a class="topbar-brand" href="#">trading_backtester</a>
+  <div class="topbar-links">
+    <a href="#design">Design</a>
+    <a href="#costs">Costs</a>
+    <a href="#walkforward">Walk-Forward</a>
+    <a href="#code">Code</a>
+    <a href="https://github.com/astew24/trading_backtester" class="btn" target="_blank" rel="noreferrer">GitHub →</a>
+  </div>
+</nav>
+
+<div class="shell">
+
+  <section class="hero">
+    <p class="eyebrow">Quantitative Research · Equity Strategies</p>
+    <h1>Liquidity-Aware Equity<br>Strategy Backtester</h1>
+    <p class="hero-sub">
+      A daily-bar research harness for equity strategies with realistic transaction frictions,
+      benchmark-relative analytics, and walk-forward validation. Built for testing short-horizon
+      ideas across liquid U.S. equities and sector ETFs without overfitting to frictionless data.
+    </p>
+    <div class="hero-links">
+      <a class="primary" href="https://github.com/astew24/trading_backtester" target="_blank" rel="noreferrer">View Repository</a>
+      <a class="secondary" href="#code">See the Code</a>
+    </div>
+  </section>
+
+  <div class="stat-row">
+    <div class="stat">
+      <span class="stat-value">500+</span>
+      <span class="stat-label">securities in equity universe</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">3-factor</span>
+      <span class="stat-label">momentum, value, quality signals</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">8 bps</span>
+      <span class="stat-label">total friction model (commission + spread + slippage)</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">OOS</span>
+      <span class="stat-label">walk-forward out-of-sample scoring</span>
+    </div>
+  </div>
+
+  <section class="section" id="design">
+    <div class="section-header">
+      <p class="section-label">Design</p>
+      <h2>Built around what makes backtests fail</h2>
+    </div>
+    <p>
+      Most backtesting frameworks let you add strategies. This one starts from the assumption that
+      transaction costs, lookahead bias, and overfitting are the primary reasons backtests don't
+      transfer. Every design decision reflects that.
+    </p>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-card-title">Liquidity gating</div>
+        <p>Mean-reversion signals are filtered by average dollar volume — avoids false fills in illiquid names where spread cost exceeds signal edge.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-title">Next-bar execution</div>
+        <p>Signals generated on bar close are executed on the next bar's open. Eliminates look-ahead bias from same-bar fills on daily data.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-title">Conservative exit logic</div>
+        <p>Stop-loss, take-profit, and trailing stop levels are applied with conservative daily OHLC assumptions when multiple levels trigger on the same bar.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-title">Benchmark-relative reporting</div>
+        <p>Every run computes excess return, tracking error, information ratio, beta, and alpha against a configured benchmark series.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-title">Reproducible artifacts</div>
+        <p>Each backtest writes a timestamped artifact bundle: <code>metrics.json</code>, <code>trades.csv</code>, <code>config_snapshot.yaml</code>, and charts.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-title">Vectorized signal generation</div>
+        <p>Strategy logic runs on full price DataFrames with pandas/NumPy vectorization — no row-by-row loops in signal paths.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="costs">
+    <div class="section-header">
+      <p class="section-label">Transaction Cost Model</p>
+      <h2>Three-component friction model</h2>
+    </div>
+    <p>
+      Each trade applies commission, spread, and slippage independently. The defaults are
+      calibrated to realistic retail/institutional costs for liquid U.S. equities on daily data.
+    </p>
+    <table class="config-table">
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>Default</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>commission_bps</td>
+          <td>5.0</td>
+          <td>Per-trade commission as basis points of notional value</td>
+        </tr>
+        <tr>
+          <td>fixed_commission</td>
+          <td>$1.00</td>
+          <td>Flat per-order fee, combined with bps cost</td>
+        </tr>
+        <tr>
+          <td>spread_bps</td>
+          <td>2.0</td>
+          <td>Half-spread paid as market impact on entry and exit</td>
+        </tr>
+        <tr>
+          <td>slippage_bps</td>
+          <td>1.0</td>
+          <td>Additional fill slippage beyond quoted spread</td>
+        </tr>
+        <tr>
+          <td>stop_loss</td>
+          <td>8%</td>
+          <td>Max adverse excursion before hard exit</td>
+        </tr>
+        <tr>
+          <td>trailing_stop</td>
+          <td>10%</td>
+          <td>Drawdown from peak triggering exit on profitable positions</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section" id="walkforward">
+    <div class="section-header">
+      <p class="section-label">Walk-Forward Validation</p>
+      <h2>Parameter selection without lookahead</h2>
+    </div>
+    <div class="two-col">
+      <div>
+        <p>
+          Walk-forward mode rolls a training window across the full data history.
+          In each fold, the best parameter set is selected on in-sample performance,
+          then evaluated on the immediately following out-of-sample window.
+          Reported metrics come only from the out-of-sample periods.
+        </p>
+        <p>
+          This guards against the most common failure mode: curve-fitting to historical
+          noise that doesn't repeat out-of-sample.
+        </p>
+      </div>
+      <div>
+        <ul class="check-list">
+          <li>Training and test windows configured independently in <code>config.yaml</code></li>
+          <li>Parameter grid defined per-strategy — searched exhaustively on training window</li>
+          <li>Selection criterion is configurable (Sharpe, Calmar, total return)</li>
+          <li>Each fold writes a row to <code>walk_forward_windows.csv</code> for audit</li>
+          <li>Aggregate OOS curve reflects realistic parameter drift over time</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="metrics">
+    <div class="section-header">
+      <p class="section-label">Performance Metrics</p>
+      <h2>Full risk-adjusted reporting</h2>
+    </div>
+    <p>Every run computes the full set of metrics used in quantitative strategy review:</p>
+    <div class="two-col" style="margin-top: 16px;">
+      <ul class="check-list">
+        <li>Total return and annualized return</li>
+        <li>Annualized volatility</li>
+        <li>Sharpe ratio (excess return / vol)</li>
+        <li>Sortino ratio (excess return / downside vol)</li>
+        <li>Calmar ratio (annualized return / max drawdown)</li>
+        <li>Maximum drawdown and drawdown duration</li>
+      </ul>
+      <ul class="check-list">
+        <li>Beta and alpha vs. benchmark</li>
+        <li>Information ratio and tracking error</li>
+        <li>Win rate, profit factor, average trade return</li>
+        <li>Average win and average loss per trade</li>
+        <li>Historical Value at Risk (95% confidence)</li>
+        <li>Average daily turnover and gross exposure</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="code">
+    <div class="section-header">
+      <p class="section-label">Code</p>
+      <h2>Mean-reversion strategy and walk-forward run</h2>
+    </div>
+    <p>
+      The mean-reversion strategy scores each security by how far its price has deviated from
+      a rolling mean, normalized by recent volatility. Signals are liquidity-gated by average
+      dollar volume before any position is taken.
+    </p>
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-filename">src/trading_backtester/strategies.py</span>
+        <span class="code-lang">python</span>
+      </div>
+      <pre><code><span style="color:#569cd6">@dataclass</span>
+<span style="color:#569cd6">class</span> <span style="color:#4ec9b0">MeanReversionStrategy</span>(BaseStrategy):
+    <span style="color:#9cdcfe">lookback</span>: <span style="color:#4ec9b0">int</span> = <span style="color:#b5cea8">20</span>
+    <span style="color:#9cdcfe">entry_z</span>: <span style="color:#4ec9b0">float</span> = <span style="color:#b5cea8">1.5</span>
+    <span style="color:#9cdcfe">exit_z</span>: <span style="color:#4ec9b0">float</span> = <span style="color:#b5cea8">0.5</span>
+    <span style="color:#9cdcfe">adv_filter_days</span>: <span style="color:#4ec9b0">int</span> = <span style="color:#b5cea8">20</span>
+    <span style="color:#9cdcfe">min_adv</span>: <span style="color:#4ec9b0">float</span> = <span style="color:#b5cea8">1_000_000.0</span>   <span style="color:#6a9955"># $1M minimum avg dollar volume</span>
+    <span style="color:#9cdcfe">allow_short</span>: <span style="color:#4ec9b0">bool</span> = <span style="color:#569cd6">True</span>
+
+    <span style="color:#569cd6">def</span> <span style="color:#dcdcaa">generate_signals</span>(<span style="color:#9cdcfe">self</span>, <span style="color:#9cdcfe">data</span>: pd.DataFrame) -&gt; pd.DataFrame:
+        frame = _validate_input_data(data)
+        close = frame[<span style="color:#ce9178">"Close"</span>]
+        volume = frame[<span style="color:#ce9178">"Volume"</span>]
+
+        <span style="color:#6a9955"># Liquidity gate — skip signals on thin trading days</span>
+        adv = (close * volume).rolling(
+            <span style="color:#9cdcfe">self</span>.adv_filter_days, min_periods=<span style="color:#9cdcfe">self</span>.adv_filter_days
+        ).mean()
+        liquid = adv &gt;= <span style="color:#9cdcfe">self</span>.min_adv
+
+        <span style="color:#6a9955"># Z-score: deviation from rolling mean, normalized by rolling std</span>
+        rolling_mean = close.rolling(<span style="color:#9cdcfe">self</span>.lookback).mean()
+        rolling_std  = close.rolling(<span style="color:#9cdcfe">self</span>.lookback).std(ddof=<span style="color:#b5cea8">1</span>)
+        z_score = (close - rolling_mean) / rolling_std.replace(<span style="color:#b5cea8">0</span>, np.nan)
+
+        target_position = pd.Series(<span style="color:#b5cea8">0.0</span>, index=frame.index)
+        <span style="color:#6a9955"># Enter long when price is depressed and liquidity is adequate</span>
+        target_position = target_position.mask(
+            (z_score &lt; -<span style="color:#9cdcfe">self</span>.entry_z) &amp; liquid, <span style="color:#b5cea8">1.0</span>
+        )
+        <span style="color:#569cd6">if</span> <span style="color:#9cdcfe">self</span>.allow_short:
+            target_position = target_position.mask(
+                (z_score &gt; <span style="color:#9cdcfe">self</span>.entry_z) &amp; liquid, <span style="color:#b5cea8">-1.0</span>
+            )</code></pre>
+    </div>
+
+    <div style="margin-top: 24px;">
+      <p>Running walk-forward validation from the CLI:</p>
+    </div>
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-filename">shell</span>
+        <span class="code-lang">bash</span>
+      </div>
+      <pre><code><span style="color:#6a9955"># Walk-forward across XLF, XLK, XLE with mean-reversion strategy</span>
+python3 main.py \
+  --strategy mean_reversion \
+  --symbols XLF XLK XLE \
+  --walk-forward
+
+<span style="color:#6a9955"># Output artifact bundle written to artifacts/&lt;timestamp&gt;/</span>
+<span style="color:#6a9955">#   metrics.json          — full Sharpe, Sortino, Calmar, alpha, beta</span>
+<span style="color:#6a9955">#   trades.csv            — every fill with entry/exit costs</span>
+<span style="color:#6a9955">#   walk_forward_windows.csv  — fold-by-fold OOS performance</span>
+<span style="color:#6a9955">#   config_snapshot.yaml  — exact run parameters for reproducibility</span></code></pre>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <p class="section-label">Limitations</p>
+      <h2>What this does not model</h2>
+    </div>
+    <p>
+      This is a daily-bar simulator. It is more realistic than most toy scripts,
+      but not a substitute for an execution simulator built on tick or order-book data.
+    </p>
+    <ul class="check-list" style="margin-top: 12px;">
+      <li>No borrow availability or hard-to-borrow fee model for short positions</li>
+      <li>No portfolio-level cash sharing — multi-symbol runs are equal-weighted aggregates</li>
+      <li>No intraday event queue or partial-fill model</li>
+      <li>Yahoo Finance data quality varies across symbols and corporate action handling</li>
+    </ul>
+  </section>
+
+  <footer class="footer">
+    <p>
+      <a href="https://github.com/astew24/trading_backtester" target="_blank" rel="noreferrer">github.com/astew24/trading_backtester</a>
+      &nbsp;·&nbsp; Andrew Stewart
+    </p>
+  </footer>
+
+</div>
+</body>
+</html>
