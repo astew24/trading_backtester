@@ -50,13 +50,20 @@ pip install -r requirements-dev.txt
 
 ## Web Demo
 
-The fastest way to show the project to an employer is the Streamlit app. It uses live Yahoo Finance data, the existing moving-average strategy, the existing backtest engine, and read-only in-memory execution.
+This repo now has two demo surfaces:
+
+- a polished GitHub Pages project site intended for `https://astew24.github.io/trading_backtester/`
+- a live Streamlit app that runs the repository's actual engine against current Yahoo Finance daily bars
+
+The Streamlit app supports both strategy families, uses the shared backtest package, and keeps execution read-only in memory.
 
 Run it locally:
 
 ```bash
 streamlit run streamlit_app.py
 ```
+
+The static public site lives under `site/` and is deployed by `.github/workflows/pages.yml`.
 
 Deploy it with Streamlit Community Cloud:
 
