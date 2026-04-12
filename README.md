@@ -1,6 +1,10 @@
 # Liquidity-Aware Equity Strategy Backtester
 
-[![Deploy to Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/)
+## Live Links
+
+- Project site: [astew24.github.io/trading_backtester](https://astew24.github.io/trading_backtester/)
+- Source repository: [github.com/astew24/trading_backtester](https://github.com/astew24/trading_backtester)
+- Live-data research app: local Streamlit entrypoint in `streamlit_app.py`
 
 This repo is a small quant research harness for daily-bar equity strategies. The focus is not on maximizing the number of indicators; it is on running short-horizon ideas with realistic trading frictions, benchmark-relative analytics, and a walk-forward workflow that is useful for actual strategy research.
 
@@ -52,10 +56,10 @@ pip install -r requirements-dev.txt
 
 This repo now has two demo surfaces:
 
-- a polished GitHub Pages project site intended for `https://astew24.github.io/trading_backtester/`
-- a live Streamlit app that runs the repository's actual engine against current Yahoo Finance daily bars
+- a shareable GitHub Pages project site at [astew24.github.io/trading_backtester](https://astew24.github.io/trading_backtester/)
+- a local Streamlit app in `streamlit_app.py` that runs the repository's actual engine against current Yahoo Finance daily bars
 
-The Streamlit app supports both strategy families, uses the shared backtest package, and keeps execution read-only in memory.
+The GitHub Pages site is the public live link for the project. The Streamlit app is the local research surface: it supports both strategy families, uses the shared backtest package, and keeps execution read-only in memory.
 
 Run it locally:
 

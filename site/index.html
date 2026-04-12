@@ -3,15 +3,27 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Trading Backtester</title>
+    <title>Trading Backtester | Daily-Bar Strategy Research</title>
     <meta
       name="description"
-      content="Liquidity-aware strategy backtesting with realistic frictions, benchmark analytics, and a polished public demo."
+      content="Daily-bar equity strategy research with realistic trading frictions, benchmark analytics, and walk-forward validation."
     />
+    <meta name="theme-color" content="#fbf8f3" />
+    <link rel="canonical" href="https://astew24.github.io/trading_backtester/" />
+    <meta property="og:title" content="Trading Backtester" />
+    <meta
+      property="og:description"
+      content="Daily-bar equity strategy research with realistic trading frictions, benchmark analytics, and walk-forward validation."
+    />
+    <meta
+      property="og:url"
+      content="https://astew24.github.io/trading_backtester/"
+    />
+    <meta property="og:type" content="website" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
@@ -22,12 +34,13 @@
     <div class="page-glow"></div>
     <header class="shell hero">
       <div class="hero-copy">
-        <p class="eyebrow">Quant Research Demo</p>
-        <h1>Liquidity-aware strategy research without toy assumptions.</h1>
+        <p class="eyebrow">Daily-Bar Research Harness</p>
+        <h1>Trading research with explicit assumptions and shareable outputs.</h1>
         <p class="lede">
-          A public showcase for a Python backtesting harness with transaction costs,
-          stop logic, benchmark analytics, walk-forward evaluation, and a cleaner
-          demo surface than a generic dashboard screenshot.
+          Python backtesting engine for liquid U.S. equities and sector ETFs. It
+          models transaction costs, stop logic, benchmark-relative analytics, and
+          walk-forward evaluation, then exposes the same engine through a CLI,
+          Streamlit app, and public Pages site.
         </p>
         <div class="hero-actions">
           <a
@@ -35,9 +48,33 @@
             href="https://github.com/astew24/trading_backtester"
             target="_blank"
             rel="noreferrer"
-            >View Repository</a
+            >View Code</a
           >
           <a class="button secondary" href="#demo">Open Demo</a>
+        </div>
+        <div class="resource-grid">
+          <div class="resource-card">
+            <span class="resource-label">Public URL</span>
+            <a
+              href="https://astew24.github.io/trading_backtester/"
+              target="_blank"
+              rel="noreferrer"
+              >astew24.github.io/trading_backtester/</a
+            >
+          </div>
+          <div class="resource-card">
+            <span class="resource-label">Source</span>
+            <a
+              href="https://github.com/astew24/trading_backtester"
+              target="_blank"
+              rel="noreferrer"
+              >github.com/astew24/trading_backtester</a
+            >
+          </div>
+          <div class="resource-card">
+            <span class="resource-label">Live-Data App</span>
+            <code>streamlit run streamlit_app.py</code>
+          </div>
         </div>
         <div class="signal-strip">
           <span>Daily bars, next-open execution</span>
@@ -58,8 +95,8 @@
         </div>
         <div class="stat-tile">
           <div class="stat-label">Surface</div>
-          <div class="stat-value">Streamlit + Pages</div>
-          <p>Interactive research app plus a static public link for portfolio sharing.</p>
+          <div class="stat-value">Pages + Local App</div>
+          <p>GitHub Pages is the shareable surface. Streamlit stays attached to the real engine in the repo.</p>
         </div>
       </aside>
     </header>
@@ -68,7 +105,7 @@
       <section class="section">
         <div class="section-head">
           <p class="eyebrow">What It Models</p>
-          <h2>Built for real strategy discussion, not indicator spam.</h2>
+          <h2>Built for research review, not indicator overload.</h2>
         </div>
         <div class="feature-grid">
           <article class="feature-card">
@@ -105,7 +142,7 @@
       <section class="section" id="demo">
         <div class="section-head">
           <p class="eyebrow">Scenario Explorer</p>
-          <h2>Three illustrative runs from the actual engine.</h2>
+          <h2>Representative runs produced by the package in this repository.</h2>
           <p class="section-copy" id="generated-at">Loading scenario data...</p>
         </div>
 
@@ -167,11 +204,11 @@ python3 main.py --walk-forward</code></pre>
         </div>
         <div class="validation-card">
           <p class="eyebrow">Validation</p>
-          <h2>Backed by code paths that are actually tested.</h2>
+          <h2>Grounded in the same code paths used by the repo.</h2>
           <ul class="bullet-list">
             <li>Unit tests cover backtesting, metrics, research, and strategy generation.</li>
             <li>Streamlit uses the same package engine as the CLI instead of a mock frontend.</li>
-            <li>GitHub Pages hosts a stable public link without inventing a fake backend.</li>
+            <li>GitHub Pages is the public share link; the live-data app remains local-first until a real hosted URL exists.</li>
           </ul>
         </div>
       </section>
@@ -179,9 +216,11 @@ python3 main.py --walk-forward</code></pre>
 
     <footer class="shell footer">
       <p>
-        Built from the <a href="https://github.com/astew24/trading_backtester">trading_backtester</a>
-        repository. The live data app remains in <code>streamlit_app.py</code>; this site
-        is the public-facing demo surface.
+        Public site:
+        <a href="https://astew24.github.io/trading_backtester/">astew24.github.io/trading_backtester/</a>.
+        Source:
+        <a href="https://github.com/astew24/trading_backtester">github.com/astew24/trading_backtester</a>.
+        The live-data interface remains in <code>streamlit_app.py</code>.
       </p>
     </footer>
   </body>

@@ -267,7 +267,7 @@ async function init() {
 
   document.getElementById(
     "generated-at",
-  ).textContent = `Illustrative runs generated on ${payload.generated_at} from live Yahoo Finance daily data using the repository's current engine.`;
+  ).textContent = `Representative runs generated on ${payload.generated_at} from recent Yahoo Finance daily data using the repository's current engine.`;
 
   buildScenarioButtons();
   renderScenario();
@@ -275,6 +275,6 @@ async function init() {
 
 init().catch((error) => {
   document.getElementById("generated-at").textContent =
-    "Unable to load demo data. Open the repository for the local Streamlit app instead.";
+    "Unable to load demo data. Open the GitHub repository or run the local Streamlit app instead.";
   console.error(error);
 });
