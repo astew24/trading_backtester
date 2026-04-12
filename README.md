@@ -59,7 +59,7 @@ This repo now has two demo surfaces:
 - a shareable GitHub Pages project site at [astew24.github.io/trading_backtester](https://astew24.github.io/trading_backtester/)
 - a local Streamlit app in `streamlit_app.py` that runs the repository's actual engine against current Yahoo Finance daily bars
 
-The GitHub Pages site is the public live link for the project. The Streamlit app is the local research surface: it supports both strategy families, uses the shared backtest package, and keeps execution read-only in memory.
+The GitHub Pages site is the public project URL. The Streamlit app is the local research surface: it supports both strategy families, uses the shared backtest package, and keeps execution read-only in memory.
 
 Run it locally:
 
@@ -69,12 +69,14 @@ streamlit run streamlit_app.py
 
 The static public site lives under `site/` and is deployed by `.github/workflows/pages.yml`.
 
-Deploy it with Streamlit Community Cloud:
+If you want to host the research app separately with Streamlit Community Cloud:
 
 1. Push the repo to GitHub.
 2. In Streamlit Community Cloud, create a new app from the repository.
 3. Set the app entrypoint to `streamlit_app.py`.
 4. Let Streamlit install dependencies from `requirements.txt`.
+
+This repository does not currently advertise a hosted Streamlit URL because the public live link today is the GitHub Pages site above.
 
 ## Run a standard backtest
 
