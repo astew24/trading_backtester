@@ -134,6 +134,37 @@ pre {
   margin: 24px 0 18px;
 }
 
+.resource-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-bottom: 18px;
+}
+
+.resource-card {
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  display: grid;
+  gap: 8px;
+  min-height: 94px;
+  padding: 16px 18px;
+}
+
+.resource-card a,
+.resource-card code {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.resource-label {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
 .button {
   border-radius: 999px;
   display: inline-flex;

@@ -126,11 +126,25 @@ def _run_symbol_backtest(
     strategy = build_strategy(strategy_config)
     signals = strategy.generate_signals(data)
     if live_start is not None:
+        original_target = signals["target_position"].copy()
+        original_signal = (
+            signals["signal"].copy() if "signal" in signals.columns else None
+        )
         warmup_mask = signals.index < live_start
         if warmup_mask.any():
             signals.loc[warmup_mask, "target_position"] = 0.0
             if "signal" in signals.columns:
                 signals.loc[warmup_mask, "signal"] = 0.0
+            live_position = int(signals.index.searchsorted(live_start))
+            if 0 < live_position < len(signals.index):
+                carry_index = signals.index[live_position - 1]
+                signals.loc[carry_index, "target_position"] = original_target.iloc[
+                    live_position - 1
+                ]
+                if original_signal is not None:
+                    signals.loc[carry_index, "signal"] = original_signal.iloc[
+                        live_position - 1
+                    ]
     engine = BacktestEngine(backtest_config)
     return engine.run(data, signals, symbol=symbol)
 
