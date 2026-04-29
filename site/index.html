@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Trading Backtester</title>
+    <meta
+      name="description"
+      content="Liquidity-aware strategy backtesting with realistic frictions, benchmark analytics, and a polished public demo."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script defer src="./app.js"></script>
+  </head>
+  <body>
+    <div class="page-glow"></div>
+    <header class="shell hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Quant Research Demo</p>
+        <h1>Liquidity-aware strategy research without toy assumptions.</h1>
+        <p class="lede">
+          A public showcase for a Python backtesting harness with transaction costs,
+          stop logic, benchmark analytics, walk-forward evaluation, and a cleaner
+          demo surface than a generic dashboard screenshot.
+        </p>
+        <div class="hero-actions">
+          <a
+            class="button primary"
+            href="https://github.com/astew24/trading_backtester"
+            target="_blank"
+            rel="noreferrer"
+            >View Repository</a
+          >
+          <a class="button secondary" href="#demo">Open Demo</a>
+        </div>
+        <div class="signal-strip">
+          <span>Daily bars, next-open execution</span>
+          <span>Commission, spread, and slippage</span>
+          <span>Walk-forward research mode</span>
+        </div>
+      </div>
+      <aside class="hero-panel">
+        <div class="stat-tile">
+          <div class="stat-label">Strategies</div>
+          <div class="stat-value">2</div>
+          <p>Trend following and liquidity-gated mean reversion.</p>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Outputs</div>
+          <div class="stat-value">Artifacts</div>
+          <p>CSV exports, charts, metrics, config snapshots, and trade logs.</p>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Surface</div>
+          <div class="stat-value">Streamlit + Pages</div>
+          <p>Interactive research app plus a static public link for portfolio sharing.</p>
+        </div>
+      </aside>
+    </header>
+
+    <main class="shell">
+      <section class="section">
+        <div class="section-head">
+          <p class="eyebrow">What It Models</p>
+          <h2>Built for real strategy discussion, not indicator spam.</h2>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card">
+            <h3>Execution Frictions</h3>
+            <p>
+              Commission, spread, and slippage are part of every run, so the equity
+              curve is not pretending fills arrive at mid on demand.
+            </p>
+          </article>
+          <article class="feature-card">
+            <h3>Risk Exits</h3>
+            <p>
+              Stop loss, take profit, and trailing stop logic are handled with
+              conservative daily-bar assumptions.
+            </p>
+          </article>
+          <article class="feature-card">
+            <h3>Benchmark Context</h3>
+            <p>
+              Returns are shown against buy-and-hold so the conversation can move
+              beyond raw CAGR into active return and drawdown.
+            </p>
+          </article>
+          <article class="feature-card">
+            <h3>Research Workflow</h3>
+            <p>
+              The same package supports CLI runs, walk-forward validation, and
+              artifact bundles for reproducible analysis.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="demo">
+        <div class="section-head">
+          <p class="eyebrow">Scenario Explorer</p>
+          <h2>Three illustrative runs from the actual engine.</h2>
+          <p class="section-copy" id="generated-at">Loading scenario data...</p>
+        </div>
+
+        <div class="scenario-buttons" id="scenario-buttons"></div>
+
+        <div class="scenario-shell">
+          <div class="scenario-summary">
+            <div>
+              <p class="overline" id="scenario-strategy"></p>
+              <h3 id="scenario-title"></h3>
+              <p id="scenario-description"></p>
+            </div>
+            <div class="chip-row" id="scenario-chips"></div>
+          </div>
+
+          <div class="metrics-grid" id="metrics-grid"></div>
+
+          <div class="chart-grid">
+            <div class="chart-card">
+              <div class="card-head">
+                <span>Price and Executions</span>
+                <span class="card-note">Entry and exit markers come from the real trade log.</span>
+              </div>
+              <div class="chart" id="price-chart"></div>
+            </div>
+            <div class="chart-card">
+              <div class="card-head">
+                <span>Equity vs Buy and Hold</span>
+                <span class="card-note">Same instrument, same window, same starting capital.</span>
+              </div>
+              <div class="chart" id="equity-chart"></div>
+            </div>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-card">
+              <div class="card-head">
+                <span>Model Notes</span>
+              </div>
+              <ul class="bullet-list" id="scenario-bullets"></ul>
+            </div>
+            <div class="detail-card">
+              <div class="card-head">
+                <span>Recent Trades</span>
+              </div>
+              <div class="table-wrap" id="trade-table"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section stack">
+        <div class="code-card">
+          <p class="eyebrow">Run It</p>
+          <h2>Local app and CLI are one command away.</h2>
+          <pre><code>pip install -e .[dev,app]
+streamlit run streamlit_app.py
+python3 main.py --walk-forward</code></pre>
+        </div>
+        <div class="validation-card">
+          <p class="eyebrow">Validation</p>
+          <h2>Backed by code paths that are actually tested.</h2>
+          <ul class="bullet-list">
+            <li>Unit tests cover backtesting, metrics, research, and strategy generation.</li>
+            <li>Streamlit uses the same package engine as the CLI instead of a mock frontend.</li>
+            <li>GitHub Pages hosts a stable public link without inventing a fake backend.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="shell footer">
+      <p>
+        Built from the <a href="https://github.com/astew24/trading_backtester">trading_backtester</a>
+        repository. The live data app remains in <code>streamlit_app.py</code>; this site
+        is the public-facing demo surface.
+      </p>
+    </footer>
+  </body>
+</html>
